@@ -1,0 +1,38 @@
+bundle:
+  name: databricks_demo_dab_07
+  uuid: 685571d7-5ad1-425e-997e-7bcb9a3d68e6
+
+include:
+  - resources/*.yml
+
+artifacts:
+  python_artifact:
+    type: whl
+    build: uv build --wheel
+
+variables:
+  catalog:
+    description: The catalog to use
+  schema:
+    description: The schema to use
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: ${var.databricks_host}
+    variables:
+      catalog: workspace
+      schema: ${workspace.current_user.short_name}
+  prod:
+    mode: production
+    workspace:
+      host: ${var.databricks_host}
+      root_path: /Workspace/Bundles/${bundle.name}/${bundle.target}
+    variables:
+      catalog: workspace
+      schema: prod
+    permissions:
+      - user_name: ${var.prod_admin_email}
+        level: CAN_MANAGE
